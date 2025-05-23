@@ -1,12 +1,13 @@
 return {
-	'nvim-treesitter/nvim-treesitter', 
-	build = ':TSUpdate',
+    'nvim-treesitter/nvim-treesitter',
+    event = { "BufReadPre", "BufNewFile" },
+    build = ':TSUpdate',
     dependencies = {
-        "nvim-lua/plenary.nvim"    
+        "nvim-lua/plenary.nvim"
     },
 
     config = function()
-        require'nvim-treesitter.configs'.setup {
+        require 'nvim-treesitter.configs'.setup {
             -- A list of parser names, or "all" (the listed parsers MUST always be installed)
             ensure_installed = { "typescript", "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
 
@@ -23,11 +24,20 @@ return {
             highlight = {
                 enable = true,
             },
-            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+            -- Setting this to
+            -- true will run `:h syntax` and tree-sitter at the same time.
             -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
             -- Using this option may slow down your editor, and you may see some duplicate highlights.
             -- Instead of true it can also be a list of languages
             additional_vim_regex_highlighting = false,
+            incremental_selection = {
+                enable = true,
+                keymaps = {
+                    init_selection = "<C-space>",
+                    node_incremental = "<C-space>",
+                    scope_incremental = false,
+                },
+            },
         }
     end
 }

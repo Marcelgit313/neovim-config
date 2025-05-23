@@ -9,7 +9,11 @@ return {
         bigfile = { enabled = true },
         dashboard = { enabled = true },
         explorer = { enabled = false },
-        indent = { enabled = true },
+        indent = {
+            indent = { char = "▏" },
+            scope = { char = "▏" },
+            animate = { enabled = false },
+        },
         input = { enabled = false },
         picker = { enabled = false },
         notifier = { enabled = false },

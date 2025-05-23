@@ -20,10 +20,15 @@ return {
                 wrap = true,
                 winblend = 0,
             },
-            keymaps = {
+            keymap = {
+                ["<C-h>"] = false,
                 ["<C-c>"] = false,
-                ["q"] = "actions.close",
-            },
+                ["<M-h>"] = "actions.select_split",
+                ["<q>"] = "actions.close"
+            }
         })
+
+        vim.keymap.set("n", "-", "<CMD>Oil<CR>")
+        vim.keymap.set("n", "<leader>-", require("oil").toggle_float)
     end,
 }
