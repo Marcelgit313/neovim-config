@@ -14,9 +14,7 @@ return {
 
         })
 
-        vim.keymap.set("n", "<leader>bp", ":BufferLinePick<CR>")
-        vim.keymap.set("n", "<leader>bc", ":BufferLinePickClose<CR>")
-        vim.keymap.set("n", "<leader>nb", ":BufferLineCyclePrev<CR>")
-        vim.keymap.set("n", "<leader>pb", ":BufferLineCycleNext<CR>")
+        vim.keymap.set("n", "<Tab>", ":BufferLineCycleNext<CR>")
+        vim.keymap.set("n", "<S-Tab>", ":BufferLineCyclePrev<CR>")
     end
 }

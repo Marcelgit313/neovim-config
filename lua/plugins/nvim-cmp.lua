@@ -59,7 +59,6 @@ return {
             return col
         end
 
-
         -- luasnip custom function
         local in_snippet = function()
             local session = require('luasnip.session')

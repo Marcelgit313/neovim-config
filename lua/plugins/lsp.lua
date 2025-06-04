@@ -128,6 +128,10 @@ return {
             lspconfig.clangd.setup({
                 capabilities = capabilities
             })
+
+            lspconfig.hls.setup({
+                capabilities = capabilities
+            })
         end
     },
 }

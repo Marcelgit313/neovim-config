@@ -7,6 +7,7 @@ return {
             { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
             { "nvim-tree/nvim-web-devicons" },
             { "andrew-george/telescope-themes" },
+            { "folke/todo-comments.nvim" },
         },
 
         config = function()
@@ -15,6 +16,7 @@ return {
             local builtin = require("telescope.builtin")
 
             telescope.load_extension("fzf")
+            telescope.load_extension("todo-comments")
 
             telescope.setup({
                 defaults = {
