@@ -132,6 +132,10 @@ return {
             lspconfig.hls.setup({
                 capabilities = capabilities
             })
+
+            lspconfig.glsl_analyzer.setup({
+                capabilities = capabilities
+            })
         end
     },
 }
