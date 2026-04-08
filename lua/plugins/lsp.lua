@@ -1,141 +1,123 @@
 return {
-    {
-        "mason-org/mason.nvim",
-        config = function()
-            require("mason").setup()
-        end
-    },
-    {
-        "mason-org/mason-lspconfig.nvim",
-        config = function()
-            require("mason-lspconfig").setup({
-                ensure_installed = { "lua_ls", "ts_ls", "clangd" },
-            })
-        end
-    },
-    {
-        "neovim/nvim-lspconfig",
-        event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            "hrsh7th/cmp-nvim-lsp",
-            { "antosha417/nvim-lsp-file-operations", config = true }
-        },
-        config = function()
-            vim.api.nvim_create_autocmd("LspAttach", {
-                group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-                callback = function(ev)
-                    -- Buffer local mappings
-                    -- Check `:help vim.lsp.*` for documentation on any of the below functions
-                    local opts = { buffer = ev.buf, silent = true }
+	{
+		"mason-org/mason.nvim",
+		config = function()
+			require("mason").setup()
+		end
+	},
+	{
+		"mason-org/mason-lspconfig.nvim",
+		config = function()
+			require("mason-lspconfig").setup({
+				ensure_installed = { "lua_ls", "ts_ls", "gopls" },
+			})
+		end
+	},
+	{
+		"neovim/nvim-lspconfig",
+		event = { "BufReadPre", "BufNewFile" },
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+		},
+		config = function()
+			--------------------------------------------------
+			-- Diagnostics
+			--------------------------------------------------
+			local signs = {
+				Error = " ",
+				Warn  = " ",
+				Hint  = "󰠠 ",
+				Info  = " ",
+			}
 
-                    -- keymaps
-                    opts.desc = "Go to declaration"
-                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
+			for type, icon in pairs(signs) do
+				local hl = "DiagnosticSign" .. type
+				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+			end
 
-                    opts.desc = "Show LSP definitions"
-                    vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
+			vim.diagnostic.config({
+				virtual_text = true,
+				signs = true,
+				underline = true,
+				update_in_insert = false,
+				severity_sort = true,
+			})
 
-                    opts.desc = "Show LSP implementations"
-                    vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
+			--------------------------------------------------
+			-- LspAttach (Keymaps + Format)
+			--------------------------------------------------
+			vim.api.nvim_create_autocmd("LspAttach", {
+				group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+				callback = function(ev)
+					local opts = { buffer = ev.buf }
 
-                    opts.desc = "Show LSP type definitions"
-                    vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
+					-- Navigation
+					vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+					vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+					vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+					vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+					vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
-                    opts.desc = "See available code actions"
-                    vim.keymap.set({ "n", "v" }, "<leader>ca", function() vim.lsp.buf.code_action() end, opts) -- see available code actions, in visual mode will apply to selection
+					-- Actions
+					vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+					vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
 
-                    opts.desc = "Smart rename"
-                    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
+					-- Signature Help (IN Funktionen)
+					vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, opts)
 
-                    opts.desc = "Show buffer diagnostics"
-                    vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts) -- show  diagnostics for file
+					-- Format on save (nur wenn unterstützt)
+					local client = vim.lsp.get_client_by_id(ev.data.client_id)
+					if client and client.supports_method("textDocument/formatting") then
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							buffer = ev.buf,
+							callback = function()
+								vim.lsp.buf.format({ bufnr = ev.buf, timeout_ms = 1000 })
+							end,
+						})
+					end
+				end,
+			})
 
-                    opts.desc = "Show line diagnostics"
-                    vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
+			--------------------------------------------------
+			-- Capabilities (für nvim-cmp)
+			--------------------------------------------------
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-                    opts.desc = "Show documentation for what is under cursor"
-                    vim.keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+			--------------------------------------------------
+			-- Server Setup
+			--------------------------------------------------
+			local lspconfig = require("lspconfig")
 
-                    opts.desc = "Restart LSP"
-                    vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+			-- Lua
+			vim.lsp.config("lua_ls", {
+				capabilities = capabilities,
+				settings = {
+					Lua = {
+						diagnostics = { globals = { "vim" } },
+						workspace = { checkThirdParty = false },
+						telemetry = { enable = false },
+					},
+				},
+			})
 
-                    vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
-                end,
-            })
+			-- TypeScript / JavaScript
+			vim.lsp.config("ts_ls", {
+				capabilities = capabilities,
+			})
 
+			-- Go
+			vim.lsp.config("gopls", {
+				capabilities = capabilities,
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
+						},
+						staticcheck = true,
+					},
+				},
+			})
+		end,
+	}
 
-            -- Define sign icons for each severity
-            local signs = {
-                [vim.diagnostic.severity.ERROR] = " ",
-                [vim.diagnostic.severity.WARN]  = " ",
-                [vim.diagnostic.severity.HINT]  = "󰠠 ",
-                [vim.diagnostic.severity.INFO]  = " ",
-            }
-
-            -- Set the diagnostic config with all icons
-            vim.diagnostic.config({
-                signs = {
-                    text = signs          -- Enable signs in the gutter
-                },
-                virtual_text = true,      -- Specify Enable virtual text for diagnostics
-                underline = true,         -- Specify Underline diagnostics
-                update_in_insert = false, -- Keep diagnostics active in insert mode
-            })
-
-            -- Setup servers
-            local lspconfig = require("lspconfig")
-            local cmp_nvim_lsp = require("cmp_nvim_lsp")
-            local capabilities = cmp_nvim_lsp.default_capabilities()
-
-            -- Config lsp servers here
-            -- lua_ls
-            lspconfig.lua_ls.setup({
-                capabilities = capabilities,
-                settings = {
-                    Lua = {
-                        diagnostics = {
-                            globals = { "vim" },
-                        },
-                        completion = {
-                            callSnippet = "Replace",
-                        },
-                        workspace = {
-                            library = {
-                                [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                                [vim.fn.stdpath("config") .. "/lua"] = true,
-                            },
-                        },
-                    },
-                },
-            })
-
-            lspconfig.ts_ls.setup({
-                capabilities = capabilities,
-                root_dir = function(fname)
-                    local util = lspconfig.util
-                    return not util.root_pattern("deno.json", "deno.jsonc")(fname)
-                        and util.root_pattern("tsconfig.json", "package.json", "jsconfig.json", ".git")(fname)
-                end,
-                single_file_support = false,
-                init_options = {
-                    preferences = {
-                        includeCompletionsWithSnippetText = true,
-                        includeCompletionsForImportStatements = true,
-                    },
-                },
-            })
-
-            lspconfig.clangd.setup({
-                capabilities = capabilities
-            })
-
-            lspconfig.hls.setup({
-                capabilities = capabilities
-            })
-
-            lspconfig.glsl_analyzer.setup({
-                capabilities = capabilities
-            })
-        end
-    },
 }
