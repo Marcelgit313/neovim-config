@@ -7,7 +7,7 @@ return {
         -- or leave it empty to use the default settings
         -- refer to the configuration section below
         bigfile = { enabled = true },
-        dashboard = { enabled = true },
+        dashboard = { example = "compact_files" },
         explorer = { enabled = false },
         indent = {
             indent = { char = "▏" },
@@ -22,5 +22,8 @@ return {
         scroll = { enabled = false },
         statuscolumn = { enabled = false },
         words = { enabled = false },
+    },
+    keys = {
+        { "<leader>h", function() Snacks.dashboard() end, desc = "Open Dashboard" }
     }
 }

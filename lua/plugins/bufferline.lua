@@ -5,6 +5,7 @@ return {
     config = function()
         require("bufferline").setup({
             options = {
+                close_command = ":Wbd %d",
                 diagnostics = "nvim_lsp",
                 diagnostics_update_on_event = true,
                 diagnostics_indicator = function(count, level)
@@ -12,7 +13,7 @@ return {
                     return " " .. icon .. count
                 end,
                 indicator = {
-                    icon = '▎', -- this should be omitted if indicator style is not 'icon'
+                    icon = '▎',
                     style = 'underline',
                 },
                 separator_style = "slope",
@@ -22,5 +23,7 @@ return {
 
         vim.keymap.set("n", "<Tab>", ":BufferLineCycleNext<CR>")
         vim.keymap.set("n", "<S-Tab>", ":BufferLineCyclePrev<CR>")
+        vim.keymap.set("n", "<leader>q", ":bd<CR>")
+        vim.keymap.set("n", "<leader>Q", ":BufferLineCloseOthers<CR>")
     end
 }
