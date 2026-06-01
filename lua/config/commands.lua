@@ -6,9 +6,8 @@ vim.api.nvim_create_user_command("Wbd", function(opts)
     end
 
     local buf = vim.bo[bufnr]
-    local bufname = vim.api.nvim_buf_get_name(bufnr)
 
-    if buf.modifiable and buf.buftype == "" and not bufname == "" then
+    if buf.modifiable and buf.buftype == "" and not vim.fn.bufname(bufnr) == "" then
         vim.api.nvim_buf_call(bufnr, function()
             vim.cmd("write")
         end)

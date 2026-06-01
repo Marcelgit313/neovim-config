@@ -9,7 +9,7 @@ return {
         "mason-org/mason-lspconfig.nvim",
         config = function()
             require("mason-lspconfig").setup({
-                ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer" },
+                ensure_installed = { "lua_ls", "ts_ls", "rust_analyzer", "glsl_analyzer", "clangd" },
                 automatic_enable = false,
             })
         end
@@ -121,8 +121,17 @@ return {
                 },
             })
 
+            vim.lsp.config("glsl_analyzer", {
+                capabilities = capabilities,
+                cmd = { 'glsl_analyzer' },
+                filetypes = { 'glsl' },
+                root_markers = { '.git' }
+            })
+
             vim.lsp.enable("lua_ls")
             vim.lsp.enable("ts_ls")
+            vim.lsp.enable("glsl_analyzer")
+            vim.lsp.enable("clangd")
         end,
     }
 
